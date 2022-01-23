@@ -17,12 +17,14 @@ struct User
 
 std::vector<User> Users;
 
-std::pair<int, int> DetermineRange(const int level){
+std::pair<int, int> DetermineRange(const int level)
+{
     std::pair<int, int> range;
     const int step = 5;
     int level_Copy = level;
 
-    while(level_Copy % step != 0){
+    while (level_Copy % step != 0)
+    {
         level_Copy--;
     }
     range.first = level_Copy;
@@ -30,7 +32,7 @@ std::pair<int, int> DetermineRange(const int level){
     return range;
 }
 
-void LoadProfiles(std::vector<User> &Users)
+void LoadProfiles(std::vector<User> &Users) // no need for argument?
 {
     std::fstream usersFile;
     usersFile.open("users.txt", std::fstream::in);
@@ -67,10 +69,9 @@ void LoadProfiles(std::vector<User> &Users)
             i++;
 
             int n_level;
-            std::istringstream(level) >> n_level;
+            std::istringstream(level) >> n_level; //own program
 
-            std::pair<int,int> range = DetermineRange(n_level);
-            
+            std::pair<int, int> range = DetermineRange(n_level);
 
             User aUser = {username, password, n_level, range};
             Users.push_back(aUser);
@@ -149,7 +150,7 @@ bool is_Username_OK(std::string &username)
     return true;
 }
 
-bool is_Password_Characters_OK(std::string &password)
+bool are_Password_Characters_OK(std::string &password)
 {
     for (int i = 0; i < password.size(); i++)
     {
@@ -211,7 +212,7 @@ bool String_Contains_Digit(std::string &str)
 
 bool Password_Check(std::string &password)
 {
-    if (!is_Password_Characters_OK(password))
+    if (!are_Password_Characters_OK(password))
     {
         std::cout << "Password contains forbidden characters!\n";
         return false;
@@ -291,7 +292,7 @@ bool LoginPassword(const int userNumber)
     std::string password;
     std::getline(std::cin, password);
 
-    if (!is_Password_Characters_OK(password))
+    if (!are_Password_Characters_OK(password))
     {
         std::cout << "Incorrect Input! Password contains forbidden characters!\n";
         return false;
@@ -308,18 +309,20 @@ bool LoginPassword(const int userNumber)
 User Login()
 {
     int userNumber = ErrorNumber;
+
     bool Loop_Username = true;
     while (Loop_Username)
     {
         Loop_Username = !LoginUsername(userNumber);
     }
+
     bool Loop_Password = true;
     while (Loop_Password)
     {
         Loop_Password = !LoginPassword(userNumber);
     } //add exist if password is not guessed
 
-    User user = Users[userNumber]; //optimal?
+    User user = Users[userNumber];
     return user;
 }
 
@@ -340,7 +343,6 @@ bool RegisterUsername(std::string &username)
         {
             std::cout << "Username is already used!\n";
             return false;
-            break;
         }
     }
 
@@ -362,8 +364,9 @@ bool RegisterPassword(std::string &password)
 
 bool RegisterPassword_Repeat(std::string &password)
 {
-    std::string rep_password;
     std::cout << "Repeat password: ";
+
+    std::string rep_password;
     std::getline(std::cin, rep_password);
 
     if (rep_password != password)
@@ -408,15 +411,17 @@ bool DeleteAccount(User &aUser)
     {
         userNumber = SearchUsernameIndex(aUser.username);
         Users.erase(Users.begin() + userNumber);
+        return true;
     }
-    return true;
+    return false;
 }
 
 void ShowAccount(std::string &username)
 {
     int userNumber = ErrorNumber;
     userNumber = SearchUsernameIndex(username);
-    if (userNumber == ErrorNumber)
+
+    if (userNumber == ErrorNumber) // shows yourself as well
     {
         std::cout << "Player not found.\n";
         return;
@@ -424,15 +429,17 @@ void ShowAccount(std::string &username)
 
     std::cout << "Player ";
     std::cout << Users[userNumber].username;
+
     std::cout << " is range ";
     std::cout << Users[userNumber].range.first;
     std::cout << "-";
     std::cout << Users[userNumber].range.second;
+
     std::cout << ".\n";
 }
 
-std::string InputOtherPlayerUsername(){
-    
+std::string InputOtherPlayerUsername()
+{
     std::cout << "Enter player username: ";
 
     std::string pl_username;
@@ -441,9 +448,42 @@ std::string InputOtherPlayerUsername(){
     return pl_username;
 }
 
-void ShowAccountTogether(){
+void ShowAccountSearchTogether()
+{
     std::string pl_username = InputOtherPlayerUsername();
     ShowAccount(pl_username);
+}
+
+void ShowAllBySameRange(std::pair<int, int> &range)
+{
+    for (int i = 0; i < Users.size(); i++)
+    {
+        if (range == Users[i].range)
+        {
+            ShowAccount(Users[i].username);
+        }
+    }
+}
+
+void ShowAllBySameRangeWithoutYou(User &aUser)
+{
+    int userNumber = ErrorNumber;
+    userNumber = SearchUsernameIndex(aUser.username);
+
+    int countSameRange = 0;
+    for (int i = 0; i < Users.size(); i++)
+    {
+        if (aUser.range == Users[i].range && userNumber != i)
+        {
+            ShowAccount(Users[i].username);
+            countSameRange++;
+        }
+    }
+
+    if (countSameRange == 0)
+    {
+        std::cout << "There are currently no players with the same range as you!\n";
+    }
 }
 
 bool UserMenuLogic(User &aUser)
@@ -467,7 +507,12 @@ bool UserMenuLogic(User &aUser)
         }
         if (UserMenuCommand == "F")
         {
-            ShowAccountTogether();
+            ShowAccountSearchTogether();
+        }
+        if (UserMenuCommand == "S")
+        {
+            //ShowAllBySameRange(aUser.range);
+            ShowAllBySameRangeWithoutYou(aUser);
         }
         if (UserMenuCommand == "L")
         {
