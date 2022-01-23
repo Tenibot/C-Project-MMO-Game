@@ -486,6 +486,75 @@ void ShowAllBySameRangeWithoutYou(User &aUser)
     }
 }
 
+void UpdatePlayerInfo(User &aUser)
+{
+    int playerNumber = SearchUsernameIndex(aUser.username);
+
+    Users[playerNumber].range = aUser.range;
+    Users[playerNumber].level = aUser.level;
+}
+
+void DuelWin(User &Winner, User &Loser)
+{
+    if (Winner.level - Loser.level < 5)
+    {
+        Winner.level++;
+        Winner.range = DetermineRange(Winner.level);
+        UpdatePlayerInfo(Winner);
+
+        if (Loser.level > 1)
+        {
+            Loser.level--;
+            Loser.range = DetermineRange(Loser.level);
+            UpdatePlayerInfo(Loser);
+        }
+    }
+    std::cout << Winner.username << " won the Duel!\n";
+}
+
+void DuelLogic(User &Attacker, User &Defender)
+{
+    if (Attacker.level > Defender.level)
+    {
+        DuelWin(Attacker, Defender);
+    }
+    else if (Attacker.level == Defender.level)
+    {
+        DuelWin(Attacker, Defender);
+    }
+    else
+    {
+        DuelWin(Defender, Attacker);
+    }
+}
+
+void Duel(User &aUser)
+{
+    std::cout << "You have choosen to Duel!\n";
+    std::string enemy_username = InputOtherPlayerUsername();
+
+    int enemyNumber = ErrorNumber;
+    enemyNumber = SearchUsernameIndex(enemy_username);
+
+    int playerNumber = SearchUsernameIndex(aUser.username);
+
+    if (enemyNumber == playerNumber)
+    {
+        std::cout << "You can't Duel yourself, sire!\n";
+        return;
+    }
+
+    if (enemyNumber == ErrorNumber)
+    {
+        std::cout << "There is no such player, sir!\n";
+        return;
+    }
+
+    User Enemy = Users[enemyNumber];
+
+    DuelLogic(aUser, Enemy);
+}
+
 bool UserMenuLogic(User &aUser)
 {
     std::string UserMenuCommand;
@@ -513,6 +582,10 @@ bool UserMenuLogic(User &aUser)
         {
             //ShowAllBySameRange(aUser.range);
             ShowAllBySameRangeWithoutYou(aUser);
+        }
+        if (UserMenuCommand == "D")
+        {
+            Duel(aUser);
         }
         if (UserMenuCommand == "L")
         {
