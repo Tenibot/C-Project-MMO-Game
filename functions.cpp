@@ -10,6 +10,17 @@
 #define ErrorNumber -1
 #define FileDataChar ':'
 
+#define Main_Command_Quit "Q"
+#define Main_Command_Login "L"
+#define Main_Command_Register "R"
+
+#define User_Command_Close "C"
+#define User_Command_Duel "D"
+#define User_Command_Find "F"
+#define User_Command_Logout "L"
+#define User_Command_Suggest "S"
+#define User_Command_Help "H"
+
 struct User
 {
     std::string username;
@@ -202,6 +213,18 @@ bool Check_OnlyTwo_Colons(const std::string &str)
     return false;
 }
 
+bool CheckDublicateProfile(const std::string username, const std::vector<User> &Users)
+{
+    for (int i = 0; i < Users.size(); i++)
+    {
+        if (username == Users[i].username)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 std::vector<User> LoadProfiles()
 {
     std::vector<User> Users;
@@ -245,7 +268,7 @@ std::vector<User> LoadProfiles()
             }
             i++;
 
-            if (Check_Only_Digits(level) && Check_Only_Digits(password) && is_Username_OK(username))
+            if (Check_Only_Digits(level) && Check_Only_Digits(password) && is_Username_OK(username) && CheckDublicateProfile(username, Users))
             {
                 int n_level;
                 n_level = ConvertTo<int>(level);
@@ -677,18 +700,36 @@ void Duel(User &aUser, std::vector<User> &Users)
     DuelLogic(aUser, Enemy, Users);
 }
 
+void HelpMainMenu()
+{
+    std::cout << "\nShowing a list of all possible commands:\n";
+    std::cout << "Login - " << Main_Command_Login << "\n";
+    std::cout << "Register - " << Main_Command_Register << "\n";
+    std::cout << "Quit - " << Main_Command_Quit << "\n";
+}
+
+void HelpUserMenu()
+{
+    std::cout << "\n";
+    std::cout << User_Command_Duel << " - Duel\n";
+    std::cout << User_Command_Find << " - Find\n";
+    std::cout << User_Command_Suggest << " - Suggest\n";
+    std::cout << User_Command_Logout << " - Logout\n";
+    std::cout << User_Command_Close << " - Close account\n";
+}
+
 bool UserMenuLogic(User &aUser, std::vector<User> &Users)
 {
     std::string UserMenuCommand;
     bool endUserMenu = false;
+    HelpUserMenu();
     do
     {
-        std::cout << "You are level " << aUser.level;
-        std::cout << ".\n";
+        std::cout << "\nYou are level " << aUser.level << ".\n";
         std::cout << "Choose one of the following options: ";
 
         std::getline(std::cin, UserMenuCommand);
-        if (UserMenuCommand == "C")
+        if (UserMenuCommand == User_Command_Close)
         {
             bool isSuccessful = DeleteAccount(aUser, Users);
             if (isSuccessful)
@@ -696,19 +737,23 @@ bool UserMenuLogic(User &aUser, std::vector<User> &Users)
                 endUserMenu = true;
             }
         }
-        if (UserMenuCommand == "F")
+        if (UserMenuCommand == User_Command_Find)
         {
             ShowAccountSearchTogether(Users);
         }
-        if (UserMenuCommand == "S")
+        if (UserMenuCommand == User_Command_Suggest)
         {
             ShowAllBySameRangeWithoutYou(aUser, Users);
         }
-        if (UserMenuCommand == "D")
+        if (UserMenuCommand == User_Command_Duel)
         {
             Duel(aUser, Users);
         }
-        if (UserMenuCommand == "L")
+        if (UserMenuCommand == User_Command_Help)
+        {
+            HelpUserMenu();
+        }
+        if (UserMenuCommand == User_Command_Logout)
         {
             endUserMenu = true;
         }
@@ -718,13 +763,15 @@ bool UserMenuLogic(User &aUser, std::vector<User> &Users)
 
 void MainMenuLogic(std::vector<User> Users, User &aUser)
 {
-    std::string HomeMenuCommand;
+    std::string MainMenuCommand;
     bool endProgram = false;
+
     do
     {
+        HelpMainMenu();
         std::cout << "Choose a command: ";
-        std::getline(std::cin, HomeMenuCommand);
-        if (HomeMenuCommand == "L")
+        std::getline(std::cin, MainMenuCommand);
+        if (MainMenuCommand == Main_Command_Login)
         {
             int User_Index = Login(Users);
             if (User_Index == ErrorNumber)
@@ -735,12 +782,12 @@ void MainMenuLogic(std::vector<User> Users, User &aUser)
             aUser = Users[User_Index];
             UserMenuLogic(aUser, Users);
         }
-        if (HomeMenuCommand == "R")
+        if (MainMenuCommand == Main_Command_Register)
         {
             aUser = Register(Users);
             UserMenuLogic(aUser, Users);
         }
-        if (HomeMenuCommand == "Q")
+        if (MainMenuCommand == Main_Command_Quit)
         {
             endProgram = true;
             SaveFile(Users);
