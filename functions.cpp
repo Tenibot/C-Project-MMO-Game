@@ -103,8 +103,22 @@ bool isLetter_Symbol(const char letter)
     return false;
 }
 
+bool is_Input_size_OK(std::string &input)
+{
+    const int min_input_size = 5;
+    if (input.size() < min_input_size)
+    {
+        return false;
+    }
+    return true;
+}
+
 bool is_Username_OK(std::string &username)
 {
+    if (!is_Input_size_OK(username))
+    {
+        return false;
+    }
     for (int i = 0; i < username.size(); i++)
     {
         if (!(isLetter_UpperCase(username[i]) || isLetter_LowerCase(username[i]) || isLetter_Digit(username[i])))
@@ -123,16 +137,6 @@ bool is_Password_Characters_OK(std::string &password)
         {
             return false;
         }
-    }
-    return true;
-}
-
-bool is_Password_size_OK(std::string &password)
-{
-    const int min_pass_size = 5;
-    if (password.size() < min_pass_size)
-    {
-        return false;
     }
     return true;
 }
@@ -192,7 +196,7 @@ bool Password_Check(std::string &password)
         std::cout << "Password contains forbidden characters!\n";
         return false;
     }
-    if (!is_Password_size_OK(password))
+    if (!is_Input_size_OK(password))
     {
         std::cout << "Password must contain at least 5 symbols!\n";
         return false;
@@ -271,16 +275,22 @@ bool LoginPassword(const int userNumber)
     return true;
 }
 
-void Login(){
+User Login()
+{
     int userNumber = -1;
     bool Loop_Username = true;
-    while(Loop_Username){
+    while (Loop_Username)
+    {
         Loop_Username = !LoginUsername(userNumber);
-    }   
+    }
     bool Loop_Password = true;
-    while(Loop_Password) {
+    while (Loop_Password)
+    {
         Loop_Password = !LoginPassword(userNumber);
-    }//add exist if password is not guessed
+    } //add exist if password is not guessed
+
+    User user = Users[userNumber]; //optimal?
+    return user;
 }
 
 bool RegisterUsername(std::string &username)
@@ -305,15 +315,15 @@ bool RegisterUsername(std::string &username)
     }
 
     return true;
-
 }
 
 bool RegisterPassword(std::string &password)
 {
-    std::cout << "Enter password: ";    
+    std::cout << "Enter password: ";
     std::getline(std::cin, password);
 
-    if(!Password_Check(password)){
+    if (!Password_Check(password))
+    {
         return false;
     }
 
@@ -323,10 +333,10 @@ bool RegisterPassword(std::string &password)
 bool RegisterPassword_Repeat(std::string &password)
 {
     std::string rep_password;
-    std::cout << "Repeat password: ";    
+    std::cout << "Repeat password: ";
     std::getline(std::cin, rep_password);
 
-    if(rep_password != password)
+    if (rep_password != password)
     {
         std::cout << "Incorrect password confirmation!\n";
         return false;
@@ -335,54 +345,83 @@ bool RegisterPassword_Repeat(std::string &password)
     return true;
 }
 
-void Register(){
-
+User Register()
+{
     std::string username;
     std::string password;
 
     bool Loop_Username = true;
-    while(Loop_Username){
+    while (Loop_Username)
+    {
         Loop_Username = !RegisterUsername(username);
         username = "";
-    } 
+    }
 
     bool Loop_Password = true;
-    while(Loop_Password) {
+    while (Loop_Password)
+    {
         Loop_Password = !RegisterPassword(password);
-        if(!Loop_Password){
-           Loop_Password = !RegisterPassword_Repeat(password);
+        if (!Loop_Password)
+        {
+            Loop_Password = !RegisterPassword_Repeat(password);
         }
     }
+    User user = {username, password, 1};
+    return user;
 }
 
-void MainMenuLogic()
-{  
+bool UserMenuLogic(User aUser)
+{
+    std::string UserMenuCommand;
+    bool endUserMenu = false;
+    do
+    {
+        std::cout << "Hello," << aUser.username << "!\n";
+        std::cout << "Choose a command: ";
+
+        std::getline(std::cin, UserMenuCommand);
+        if (UserMenuCommand == "C")
+        {
+        }
+        if (UserMenuCommand == "L")
+        {
+            endUserMenu = true;
+        }
+    } while (!endUserMenu);
+    return endUserMenu;
+}
+
+bool MainMenuLogic(User &aUser)
+{
     std::string HomeMenuCommand;
     bool endProgram = false;
     do
     {
-        std::cout << "Choose a command: "; 
+        std::cout << "Choose a command: ";
         std::getline(std::cin, HomeMenuCommand);
         if (HomeMenuCommand == "L")
         {
-            Login();
+           aUser = Login();
+           UserMenuLogic(aUser);
         }
         if (HomeMenuCommand == "R")
         {
-            Register();
+            aUser = Register();
+            UserMenuLogic(aUser);
         }
         if (HomeMenuCommand == "Q")
         {
             endProgram = true;
         }
     } while (!endProgram);
+    return endProgram;
 }
 
 int main()
 {
     LoadProfiles(Users);
-    MainMenuLogic();
-
+    User aUser;
+    MainMenuLogic(aUser);
 
     return 0;
 }
