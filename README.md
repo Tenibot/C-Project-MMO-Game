@@ -1,4 +1,4 @@
-# C-Project-MMO-Game
+# C++-Project-MMO-Game
 ## Solution to course project # 2
 Introduction to programming course\
 Faculty of Mathematics and Informatics of Sofia University\
