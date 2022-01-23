@@ -234,7 +234,6 @@ void LoadProfiles()
         {
             if (!Check_OnlyTwo_Colons(userLine))
             {
-                //delete();
                 continue;
             }
 
@@ -405,24 +404,39 @@ bool LoginPassword(const int userNumber)
     return true;
 }
 
-User Login()
+int Login()
 {
     int userNumber = ErrorNumber;
 
     bool Loop_Username = true;
+
+    int loops = 0;
+    const int loops_Limit = 3;
+
     while (Loop_Username)
     {
+        loops++;
+        if (loops > loops_Limit)
+        {
+            return ErrorNumber;
+        }
         Loop_Username = !LoginUsername(userNumber);
     }
+
+    loops = 0;
 
     bool Loop_Password = true;
     while (Loop_Password)
     {
+        loops++;
+        if (loops > loops_Limit)
+        {
+            return ErrorNumber;
+        }
         Loop_Password = !LoginPassword(userNumber);
-    } //add exist if password is not guessed
+    }
 
-    User user = Users[userNumber];
-    return user;
+    return userNumber;
 }
 
 bool RegisterUsername(std::string &username)
@@ -718,7 +732,12 @@ bool MainMenuLogic(User &aUser)
         std::getline(std::cin, HomeMenuCommand);
         if (HomeMenuCommand == "L")
         {
-            aUser = Login();
+            int User_Index = Login();
+            if(User_Index == ErrorNumber){
+                std::cout << "Login was cancelled!\n";
+                continue;
+            }
+            aUser = Users[User_Index];
             UserMenuLogic(aUser);
         }
         if (HomeMenuCommand == "R")
