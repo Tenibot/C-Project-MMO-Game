@@ -216,7 +216,7 @@ bool checkFile(std::string &userLine)
 void LoadProfiles()
 {
     std::fstream usersFile;
-    usersFile.open("users1.txt", std::fstream::in);
+    usersFile.open("users.txt", std::fstream::in);
 
     std::string userLine;
 
@@ -226,12 +226,18 @@ void LoadProfiles()
 
     if (usersFile.is_open() == false)
     {
-        usersFile.open("users1.txt", std::fstream::out);
+        usersFile.open("users.txt", std::fstream::out);
     }
     else
     {
         while (std::getline(usersFile, userLine))
         {
+            if (!Check_OnlyTwo_Colons(userLine))
+            {
+                //delete();
+                continue;
+            }
+
             int i = 0;
             while (i < userLine.size() && userLine[i] != FileDataChar)
             {
@@ -249,15 +255,18 @@ void LoadProfiles()
             }
             i++;
 
-            int n_level;
-            n_level = ConvertTo<int>(level);
+            if (Check_Only_Digits(level) && Check_Only_Digits(password) && is_Username_OK(username))
+            {
+                int n_level;
+                n_level = ConvertTo<int>(level);
 
-            std::pair<int, int> range = DetermineRange(n_level);
+                std::pair<int, int> range = DetermineRange(n_level);
 
-            std::size_t n_password = ConvertTo<size_t>(password);
+                std::size_t n_password = ConvertTo<size_t>(password);
 
-            User aUser = {username, n_password, n_level, range};
-            Users.push_back(aUser);
+                User aUser = {username, n_password, n_level, range};
+                Users.push_back(aUser);
+            }
 
             username = "";
             password = "";
@@ -270,7 +279,7 @@ void LoadProfiles()
 void SaveFile()
 {
     std::fstream usersFile;
-    usersFile.open("users1.txt", std::fstream::out);
+    usersFile.open("users.txt", std::fstream::out);
 
     std::string userLine;
 
