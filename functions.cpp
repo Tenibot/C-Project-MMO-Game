@@ -1,16 +1,18 @@
 #include <iostream>
 #include <vector>
 #include <string>
+
 #include <fstream>
-#include <sstream>
+
 #include <utility>
+#include <functional>
 
 #define ErrorNumber -1
 
 struct User
 {
     std::string username;
-    std::string password;
+    std::size_t password;
     int level = 1;
     std::pair<int, int> range;
 };
@@ -32,7 +34,20 @@ std::pair<int, int> DetermineRange(const int level)
     return range;
 }
 
-void LoadProfiles(std::vector<User> &Users) // no need for argument?
+template <typename T>
+
+T ConvertTo(std::string &text)
+{
+    T result = 0;
+    for (int i = 0; i < text.size(); i++)
+    {
+        result *= 10;
+        result += text[i] - '0';
+    }
+    return result;
+}
+
+void LoadProfiles()
 {
     std::fstream usersFile;
     usersFile.open("users.txt", std::fstream::in);
@@ -45,7 +60,7 @@ void LoadProfiles(std::vector<User> &Users) // no need for argument?
 
     if (usersFile.is_open() == false)
     {
-        std::cerr << "Failed to open file";
+        std::cerr << "Failed to open file.";
     }
     else
     {
@@ -69,11 +84,13 @@ void LoadProfiles(std::vector<User> &Users) // no need for argument?
             i++;
 
             int n_level;
-            std::istringstream(level) >> n_level; //own program
+            n_level = ConvertTo<int>(level);
 
             std::pair<int, int> range = DetermineRange(n_level);
 
-            User aUser = {username, password, n_level, range};
+            std::size_t n_password = ConvertTo<size_t>(password);
+
+            User aUser = {username, n_password, n_level, range};
             Users.push_back(aUser);
 
             username = "";
@@ -286,6 +303,13 @@ bool LoginUsername(int &userNumber)
     return true;
 }
 
+size_t ReturnHash(std::string &password)
+{
+    std::hash<std::string> str_hash;
+    std::size_t h_password = str_hash(password);
+    return h_password;
+}
+
 bool LoginPassword(const int userNumber)
 {
     std::cout << "Enter password: ";
@@ -297,7 +321,10 @@ bool LoginPassword(const int userNumber)
         std::cout << "Incorrect Input! Password contains forbidden characters!\n";
         return false;
     }
-    if (password != Users[userNumber].password)
+
+    std::size_t h_password = ReturnHash(password);
+
+    if (h_password != Users[userNumber].password)
     {
         std::cout << "Password is incorrect! Try again!\n";
         return false;
@@ -374,6 +401,23 @@ bool RegisterPassword_Repeat(std::string &password)
         std::cout << "Incorrect password confirmation!\n";
         return false;
     }
+    return true;
+}
+
+bool DeletePassword_Repeat(std::size_t &h_password)
+{
+    std::cout << "Confirm password: ";
+
+    std::string rep_password;
+    std::getline(std::cin, rep_password);
+
+    std::size_t rep_h_password = ReturnHash(rep_password);
+
+    if (rep_h_password != h_password)
+    {
+        std::cout << "Incorrect password confirmation!\n";
+        return false;
+    }
 
     return true;
 }
@@ -402,8 +446,10 @@ User Register()
             Loop_Password = !RegisterPassword_Repeat(password);
         }
     }
-    
-    User user = {username, password};
+
+    std::size_t h_password = ReturnHash(password);
+
+    User user = {username, h_password};
     user.range = DetermineRange(user.level);
     Users.push_back(user);
 
@@ -412,7 +458,7 @@ User Register()
 
 bool DeleteAccount(User &aUser)
 {
-    bool isIn = RegisterPassword_Repeat(aUser.password);
+    bool isIn = DeletePassword_Repeat(aUser.password);
     int userNumber = ErrorNumber;
     if (isIn)
     {
@@ -428,7 +474,7 @@ void ShowAccount(std::string &username)
     int userNumber = ErrorNumber;
     userNumber = SearchUsernameIndex(username);
 
-    if (userNumber == ErrorNumber) // shows yourself as well
+    if (userNumber == ErrorNumber)
     {
         std::cout << "Player not found.\n";
         return;
@@ -459,17 +505,6 @@ void ShowAccountSearchTogether()
 {
     std::string pl_username = InputOtherPlayerUsername();
     ShowAccount(pl_username);
-}
-
-void ShowAllBySameRange(std::pair<int, int> &range)
-{
-    for (int i = 0; i < Users.size(); i++)
-    {
-        if (range == Users[i].range)
-        {
-            ShowAccount(Users[i].username);
-        }
-    }
 }
 
 void ShowAllBySameRangeWithoutYou(User &aUser)
@@ -587,7 +622,6 @@ bool UserMenuLogic(User &aUser)
         }
         if (UserMenuCommand == "S")
         {
-            //ShowAllBySameRange(aUser.range);
             ShowAllBySameRangeWithoutYou(aUser);
         }
         if (UserMenuCommand == "D")
@@ -630,9 +664,10 @@ bool MainMenuLogic(User &aUser)
 
 int main()
 {
-    LoadProfiles(Users);
+    LoadProfiles();
     User aUser;
     MainMenuLogic(aUser);
+
 
     return 0;
 }
