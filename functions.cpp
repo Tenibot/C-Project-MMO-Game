@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <utility>
 
 #define ErrorNumber -1
 
@@ -10,10 +11,24 @@ struct User
 {
     std::string username;
     std::string password;
-    int level;
+    int level = 1;
+    std::pair<int, int> range;
 };
 
 std::vector<User> Users;
+
+std::pair<int, int> DetermineRange(const int level){
+    std::pair<int, int> range;
+    const int step = 5;
+    int level_Copy = level;
+
+    while(level_Copy % step != 0){
+        level_Copy--;
+    }
+    range.first = level_Copy;
+    range.second = level_Copy + step;
+    return range;
+}
 
 void LoadProfiles(std::vector<User> &Users)
 {
@@ -54,7 +69,10 @@ void LoadProfiles(std::vector<User> &Users)
             int n_level;
             std::istringstream(level) >> n_level;
 
-            User aUser = {username, password, n_level};
+            std::pair<int,int> range = DetermineRange(n_level);
+            
+
+            User aUser = {username, password, n_level, range};
             Users.push_back(aUser);
 
             username = "";
@@ -226,7 +244,8 @@ bool Password_Check(std::string &password)
     return true;
 }
 
-int SearchUsernameIndex(std::string &username){
+int SearchUsernameIndex(std::string &username)
+{
     int userNumber = ErrorNumber;
     for (int i = 0; i < Users.size(); i++)
     {
@@ -253,7 +272,8 @@ bool LoginUsername(int &userNumber)
 
     bool isUsernameSaved = false;
     userNumber = SearchUsernameIndex(username);
-    if(userNumber != ErrorNumber){
+    if (userNumber != ErrorNumber)
+    {
         isUsernameSaved = true;
     }
 
@@ -376,38 +396,78 @@ User Register()
             Loop_Password = !RegisterPassword_Repeat(password);
         }
     }
-    User user = {username, password, 1};
+    User user = {username, password};
     return user;
 }
 
-bool DeleteAccount(User aUser)
-{  
+bool DeleteAccount(User &aUser)
+{
     bool isIn = RegisterPassword_Repeat(aUser.password);
     int userNumber = ErrorNumber;
-    if(isIn){
-       userNumber = SearchUsernameIndex(aUser.username);
-       Users.erase(Users.begin() + userNumber);
+    if (isIn)
+    {
+        userNumber = SearchUsernameIndex(aUser.username);
+        Users.erase(Users.begin() + userNumber);
     }
     return true;
 }
 
-bool UserMenuLogic(User aUser)
+void ShowAccount(std::string &username)
+{
+    int userNumber = ErrorNumber;
+    userNumber = SearchUsernameIndex(username);
+    if (userNumber == ErrorNumber)
+    {
+        std::cout << "Player not found.\n";
+        return;
+    }
+
+    std::cout << "Player ";
+    std::cout << Users[userNumber].username;
+    std::cout << " is range ";
+    std::cout << Users[userNumber].range.first;
+    std::cout << "-";
+    std::cout << Users[userNumber].range.second;
+    std::cout << ".\n";
+}
+
+std::string InputOtherPlayerUsername(){
+    
+    std::cout << "Enter player username: ";
+
+    std::string pl_username;
+    std::getline(std::cin, pl_username);
+
+    return pl_username;
+}
+
+void ShowAccountTogether(){
+    std::string pl_username = InputOtherPlayerUsername();
+    ShowAccount(pl_username);
+}
+
+bool UserMenuLogic(User &aUser)
 {
     std::string UserMenuCommand;
     bool endUserMenu = false;
     do
     {
-        std::cout << "Hello," << aUser.username << "!\n";
-        std::cout << "Choose a command: ";
+        std::cout << "You are level " << aUser.level;
+        std::cout << ".\n";
+        std::cout << "Choose one of the following options: ";
 
         std::getline(std::cin, UserMenuCommand);
         if (UserMenuCommand == "C")
         {
-            bool isSuccessfully = DeleteAccount(aUser);
-            if (isSuccessfully)
+            bool isSuccessful = DeleteAccount(aUser);
+            if (isSuccessful)
             {
                 endUserMenu = true;
-            }  
+            }
+        }
+        if (UserMenuCommand == "F")
+        {
+            ShowAccountTogether();
         }
         if (UserMenuCommand == "L")
         {
@@ -427,8 +487,8 @@ bool MainMenuLogic(User &aUser)
         std::getline(std::cin, HomeMenuCommand);
         if (HomeMenuCommand == "L")
         {
-           aUser = Login();
-           UserMenuLogic(aUser);
+            aUser = Login();
+            UserMenuLogic(aUser);
         }
         if (HomeMenuCommand == "R")
         {
