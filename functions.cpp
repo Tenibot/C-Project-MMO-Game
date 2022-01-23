@@ -18,8 +18,6 @@ struct User
     std::pair<int, int> range;
 };
 
-std::vector<User> Users;
-
 std::pair<int, int> DetermineRange(const int level)
 {
     std::pair<int, int> range;
@@ -37,7 +35,7 @@ std::pair<int, int> DetermineRange(const int level)
 
 template <typename T>
 
-T ConvertTo(std::string &text)
+T ConvertTo(const std::string &text)
 {
     T result = 0;
     for (int i = 0; i < text.size(); i++)
@@ -88,7 +86,7 @@ bool isLetter_Symbol(const char letter)
     return false;
 }
 
-bool is_Input_size_OK(std::string &input)
+bool is_Input_size_OK(const std::string &input)
 {
     const int min_input_size = 5;
     if (input.size() < min_input_size)
@@ -98,7 +96,7 @@ bool is_Input_size_OK(std::string &input)
     return true;
 }
 
-bool is_Username_OK(std::string &username)
+bool is_Username_OK(const std::string &username)
 {
     if (!is_Input_size_OK(username))
     {
@@ -114,7 +112,7 @@ bool is_Username_OK(std::string &username)
     return true;
 }
 
-bool are_Password_Characters_OK(std::string &password)
+bool are_Password_Characters_OK(const std::string &password)
 {
     for (int i = 0; i < password.size(); i++)
     {
@@ -126,7 +124,7 @@ bool are_Password_Characters_OK(std::string &password)
     return true;
 }
 
-bool String_Contains_UpperCase(std::string &str)
+bool String_Contains_UpperCase(const std::string &str)
 {
     for (int i = 0; i < str.size(); i++)
     {
@@ -138,7 +136,7 @@ bool String_Contains_UpperCase(std::string &str)
     return false;
 }
 
-bool String_Contains_LowerCase(std::string &str)
+bool String_Contains_LowerCase(const std::string &str)
 {
     for (int i = 0; i < str.size(); i++)
     {
@@ -150,7 +148,7 @@ bool String_Contains_LowerCase(std::string &str)
     return false;
 }
 
-bool String_Contains_Symbol(std::string &str)
+bool String_Contains_Symbol(const std::string &str)
 {
     for (int i = 0; i < str.size(); i++)
     {
@@ -162,7 +160,7 @@ bool String_Contains_Symbol(std::string &str)
     return false;
 }
 
-bool String_Contains_Digit(std::string &str)
+bool String_Contains_Digit(const std::string &str)
 {
     for (int i = 0; i < str.size(); i++)
     {
@@ -174,7 +172,7 @@ bool String_Contains_Digit(std::string &str)
     return false;
 }
 
-bool Check_Only_Digits(std::string &str)
+bool Check_Only_Digits(const std::string &str)
 {
     for (int i = 0; i < str.size(); i++)
     {
@@ -186,7 +184,7 @@ bool Check_Only_Digits(std::string &str)
     return true;
 }
 
-bool Check_OnlyTwo_Colons(std::string &str)
+bool Check_OnlyTwo_Colons(const std::string &str)
 {
     int count_colons = 0;
     for (int i = 0; i < str.size(); i++)
@@ -204,17 +202,10 @@ bool Check_OnlyTwo_Colons(std::string &str)
     return false;
 }
 
-bool checkFile(std::string &userLine)
+std::vector<User> LoadProfiles()
 {
-    if (Check_OnlyTwo_Colons(userLine))
-    {
-        return true;
-    }
-    return false;
-}
+    std::vector<User> Users;
 
-void LoadProfiles()
-{
     std::fstream usersFile;
     usersFile.open("users.txt", std::fstream::in);
 
@@ -261,7 +252,7 @@ void LoadProfiles()
 
                 std::pair<int, int> range = DetermineRange(n_level);
 
-                std::size_t n_password = ConvertTo<size_t>(password);
+                std::size_t n_password = ConvertTo<std::size_t>(password);
 
                 User aUser = {username, n_password, n_level, range};
                 Users.push_back(aUser);
@@ -273,9 +264,11 @@ void LoadProfiles()
         }
     }
     usersFile.close();
+
+    return Users;
 }
 
-void SaveFile()
+void SaveFile(const std::vector<User> &Users)
 {
     std::fstream usersFile;
     usersFile.open("users.txt", std::fstream::out);
@@ -298,7 +291,7 @@ void SaveFile()
     }
 }
 
-bool Password_Check(std::string &password)
+bool Password_Check(const std::string &password)
 {
     if (!are_Password_Characters_OK(password))
     {
@@ -333,7 +326,7 @@ bool Password_Check(std::string &password)
     return true;
 }
 
-int SearchUsernameIndex(std::string &username)
+int SearchUsernameIndex(const std::string &username, const std::vector<User> &Users)
 {
     int userNumber = ErrorNumber;
     for (int i = 0; i < Users.size(); i++)
@@ -347,7 +340,8 @@ int SearchUsernameIndex(std::string &username)
     return userNumber;
 }
 
-bool LoginUsername(int &userNumber)
+//changes the userNumber
+bool LoginUsername(int &userNumber, const std::vector<User> &Users)
 {
     std::cout << "Enter username: ";
     std::string username;
@@ -360,7 +354,7 @@ bool LoginUsername(int &userNumber)
     }
 
     bool isUsernameSaved = false;
-    userNumber = SearchUsernameIndex(username);
+    userNumber = SearchUsernameIndex(username, Users);
     if (userNumber != ErrorNumber)
     {
         isUsernameSaved = true;
@@ -374,14 +368,14 @@ bool LoginUsername(int &userNumber)
     return true;
 }
 
-size_t ReturnHash(std::string &password)
+std::size_t ReturnHash(const std::string &password)
 {
     std::hash<std::string> str_hash;
     std::size_t h_password = str_hash(password);
     return h_password;
 }
 
-bool LoginPassword(const int userNumber)
+bool LoginPassword(const int userNumber, const std::vector<User> &Users)
 {
     std::cout << "Enter password: ";
     std::string password;
@@ -404,7 +398,7 @@ bool LoginPassword(const int userNumber)
     return true;
 }
 
-int Login()
+int Login(const std::vector<User> &Users)
 {
     int userNumber = ErrorNumber;
 
@@ -420,7 +414,7 @@ int Login()
         {
             return ErrorNumber;
         }
-        Loop_Username = !LoginUsername(userNumber);
+        Loop_Username = !LoginUsername(userNumber, Users);
     }
 
     loops = 0;
@@ -433,13 +427,13 @@ int Login()
         {
             return ErrorNumber;
         }
-        Loop_Password = !LoginPassword(userNumber);
+        Loop_Password = !LoginPassword(userNumber, Users);
     }
 
     return userNumber;
 }
 
-bool RegisterUsername(std::string &username)
+bool RegisterUsername(std::string &username, const std::vector<User> &Users)
 {
     std::cout << "Enter a new username: ";
     std::getline(std::cin, username);
@@ -475,7 +469,7 @@ bool RegisterPassword(std::string &password)
     return true;
 }
 
-bool RegisterPassword_Repeat(std::string &password)
+bool RegisterPassword_Repeat(const std::string &password)
 {
     std::cout << "Repeat password: ";
 
@@ -490,7 +484,7 @@ bool RegisterPassword_Repeat(std::string &password)
     return true;
 }
 
-bool DeletePassword_Repeat(std::size_t &h_password)
+bool DeletePassword_Repeat(const std::size_t &h_password)
 {
     std::cout << "Confirm password: ";
 
@@ -508,7 +502,7 @@ bool DeletePassword_Repeat(std::size_t &h_password)
     return true;
 }
 
-User Register()
+User Register(std::vector<User> &Users)
 {
     std::string username;
     std::string password;
@@ -516,7 +510,7 @@ User Register()
     bool Loop_Username = true;
     while (Loop_Username)
     {
-        Loop_Username = !RegisterUsername(username);
+        Loop_Username = !RegisterUsername(username, Users);
         if (Loop_Username)
         {
             username = "";
@@ -542,23 +536,23 @@ User Register()
     return user;
 }
 
-bool DeleteAccount(User &aUser)
+bool DeleteAccount(const User &aUser, std::vector<User> &Users)
 {
     bool isIn = DeletePassword_Repeat(aUser.password);
     int userNumber = ErrorNumber;
     if (isIn)
     {
-        userNumber = SearchUsernameIndex(aUser.username);
+        userNumber = SearchUsernameIndex(aUser.username, Users);
         Users.erase(Users.begin() + userNumber);
         return true;
     }
     return false;
 }
 
-void ShowAccount(std::string &username)
+void ShowAccount(const std::string &username, const std::vector<User> &Users)
 {
     int userNumber = ErrorNumber;
-    userNumber = SearchUsernameIndex(username);
+    userNumber = SearchUsernameIndex(username, Users);
 
     if (userNumber == ErrorNumber)
     {
@@ -587,23 +581,23 @@ std::string InputOtherPlayerUsername()
     return pl_username;
 }
 
-void ShowAccountSearchTogether()
+void ShowAccountSearchTogether(const std::vector<User> &Users)
 {
     std::string pl_username = InputOtherPlayerUsername();
-    ShowAccount(pl_username);
+    ShowAccount(pl_username, Users);
 }
 
-void ShowAllBySameRangeWithoutYou(User &aUser)
+void ShowAllBySameRangeWithoutYou(const User &aUser, const std::vector<User> &Users)
 {
     int userNumber = ErrorNumber;
-    userNumber = SearchUsernameIndex(aUser.username);
+    userNumber = SearchUsernameIndex(aUser.username, Users);
 
     int countSameRange = 0;
     for (int i = 0; i < Users.size(); i++)
     {
         if (aUser.range == Users[i].range && userNumber != i)
         {
-            ShowAccount(Users[i].username);
+            ShowAccount(Users[i].username, Users);
             countSameRange++;
         }
     }
@@ -614,57 +608,57 @@ void ShowAllBySameRangeWithoutYou(User &aUser)
     }
 }
 
-void UpdatePlayerInfo(User &aUser)
+void UpdatePlayerInfo(const User &aUser, std::vector<User> &Users)
 {
-    int playerNumber = SearchUsernameIndex(aUser.username);
+    int playerNumber = SearchUsernameIndex(aUser.username, Users);
 
     Users[playerNumber].range = aUser.range;
     Users[playerNumber].level = aUser.level;
 }
 
-void DuelWin(User &Winner, User &Loser)
+void DuelWin(User &Winner, User &Loser, std::vector<User> &Users)
 {
     if (Winner.level - Loser.level < 5)
     {
         Winner.level++;
         Winner.range = DetermineRange(Winner.level);
-        UpdatePlayerInfo(Winner);
+        UpdatePlayerInfo(Winner, Users);
 
         if (Loser.level > 1)
         {
             Loser.level--;
             Loser.range = DetermineRange(Loser.level);
-            UpdatePlayerInfo(Loser);
+            UpdatePlayerInfo(Loser, Users);
         }
     }
     std::cout << Winner.username << " won the Duel!\n";
 }
 
-void DuelLogic(User &Attacker, User &Defender)
+void DuelLogic(User &Attacker, User &Defender, std::vector<User> &Users)
 {
     if (Attacker.level > Defender.level)
     {
-        DuelWin(Attacker, Defender);
+        DuelWin(Attacker, Defender, Users);
     }
     else if (Attacker.level == Defender.level)
     {
-        DuelWin(Attacker, Defender);
+        DuelWin(Attacker, Defender, Users);
     }
     else
     {
-        DuelWin(Defender, Attacker);
+        DuelWin(Defender, Attacker, Users);
     }
 }
 
-void Duel(User &aUser)
+void Duel(User &aUser, std::vector<User> &Users)
 {
     std::cout << "You have choosen to Duel!\n";
     std::string enemy_username = InputOtherPlayerUsername();
 
     int enemyNumber = ErrorNumber;
-    enemyNumber = SearchUsernameIndex(enemy_username);
+    enemyNumber = SearchUsernameIndex(enemy_username, Users);
 
-    int playerNumber = SearchUsernameIndex(aUser.username);
+    int playerNumber = SearchUsernameIndex(aUser.username, Users);
 
     if (enemyNumber == playerNumber)
     {
@@ -680,10 +674,10 @@ void Duel(User &aUser)
 
     User Enemy = Users[enemyNumber];
 
-    DuelLogic(aUser, Enemy);
+    DuelLogic(aUser, Enemy, Users);
 }
 
-bool UserMenuLogic(User &aUser)
+bool UserMenuLogic(User &aUser, std::vector<User> &Users)
 {
     std::string UserMenuCommand;
     bool endUserMenu = false;
@@ -696,7 +690,7 @@ bool UserMenuLogic(User &aUser)
         std::getline(std::cin, UserMenuCommand);
         if (UserMenuCommand == "C")
         {
-            bool isSuccessful = DeleteAccount(aUser);
+            bool isSuccessful = DeleteAccount(aUser, Users);
             if (isSuccessful)
             {
                 endUserMenu = true;
@@ -704,15 +698,15 @@ bool UserMenuLogic(User &aUser)
         }
         if (UserMenuCommand == "F")
         {
-            ShowAccountSearchTogether();
+            ShowAccountSearchTogether(Users);
         }
         if (UserMenuCommand == "S")
         {
-            ShowAllBySameRangeWithoutYou(aUser);
+            ShowAllBySameRangeWithoutYou(aUser, Users);
         }
         if (UserMenuCommand == "D")
         {
-            Duel(aUser);
+            Duel(aUser, Users);
         }
         if (UserMenuCommand == "L")
         {
@@ -722,7 +716,7 @@ bool UserMenuLogic(User &aUser)
     return endUserMenu;
 }
 
-bool MainMenuLogic(User &aUser)
+void MainMenuLogic(std::vector<User> Users, User &aUser)
 {
     std::string HomeMenuCommand;
     bool endProgram = false;
@@ -732,33 +726,35 @@ bool MainMenuLogic(User &aUser)
         std::getline(std::cin, HomeMenuCommand);
         if (HomeMenuCommand == "L")
         {
-            int User_Index = Login();
-            if(User_Index == ErrorNumber){
+            int User_Index = Login(Users);
+            if (User_Index == ErrorNumber)
+            {
                 std::cout << "Login was cancelled!\n";
                 continue;
             }
             aUser = Users[User_Index];
-            UserMenuLogic(aUser);
+            UserMenuLogic(aUser, Users);
         }
         if (HomeMenuCommand == "R")
         {
-            aUser = Register();
-            UserMenuLogic(aUser);
+            aUser = Register(Users);
+            UserMenuLogic(aUser, Users);
         }
         if (HomeMenuCommand == "Q")
         {
             endProgram = true;
-            SaveFile();
+            SaveFile(Users);
         }
     } while (!endProgram);
-    return endProgram;
+    return;
 }
 
 int main()
 {
-    LoadProfiles();
+    std::vector<User> Users = LoadProfiles();
     User aUser;
-    MainMenuLogic(aUser);
+
+    MainMenuLogic(Users, aUser);
 
     return 0;
 }
