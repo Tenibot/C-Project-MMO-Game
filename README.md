@@ -9,4 +9,4 @@ Winter semester 2021/2022
 ## Useful links
 [Task](https://docs.google.com/document/d/1EJFak-689ZuuxLU37BbvRse_dUO03Lc3aZWdAetSl_Y/edit)  
 [Requirements](https://docs.google.com/document/d/1YaD8OqIXTmfB7jxL0sWXSIYaDK75WYEUiPQhroauOWE/edit?usp=sharing)  
-[Program guidelines](guidlines.md)
+[Program guidelines](guidelines.md)
