@@ -4,6 +4,8 @@
 #include <fstream>
 #include <sstream>
 
+#define ErrorNumber -1
+
 struct User
 {
     std::string username;
@@ -224,6 +226,19 @@ bool Password_Check(std::string &password)
     return true;
 }
 
+int SearchUsernameIndex(std::string &username){
+    int userNumber = ErrorNumber;
+    for (int i = 0; i < Users.size(); i++)
+    {
+        if (username == Users[i].username)
+        {
+            userNumber = i;
+            break;
+        }
+    }
+    return userNumber;
+}
+
 bool LoginUsername(int &userNumber)
 {
     std::cout << "Enter username: ";
@@ -237,14 +252,9 @@ bool LoginUsername(int &userNumber)
     }
 
     bool isUsernameSaved = false;
-    for (int i = 0; i < Users.size(); i++)
-    {
-        if (username == Users[i].username)
-        {
-            userNumber = i;
-            isUsernameSaved = true;
-            break;
-        }
+    userNumber = SearchUsernameIndex(username);
+    if(userNumber != ErrorNumber){
+        isUsernameSaved = true;
     }
 
     if (!isUsernameSaved)
@@ -277,7 +287,7 @@ bool LoginPassword(const int userNumber)
 
 User Login()
 {
-    int userNumber = -1;
+    int userNumber = ErrorNumber;
     bool Loop_Username = true;
     while (Loop_Username)
     {
@@ -370,6 +380,17 @@ User Register()
     return user;
 }
 
+bool DeleteAccount(User aUser)
+{  
+    bool isIn = RegisterPassword_Repeat(aUser.password);
+    int userNumber = ErrorNumber;
+    if(isIn){
+       userNumber = SearchUsernameIndex(aUser.username);
+       Users.erase(Users.begin() + userNumber);
+    }
+    return true;
+}
+
 bool UserMenuLogic(User aUser)
 {
     std::string UserMenuCommand;
@@ -382,6 +403,11 @@ bool UserMenuLogic(User aUser)
         std::getline(std::cin, UserMenuCommand);
         if (UserMenuCommand == "C")
         {
+            bool isSuccessfully = DeleteAccount(aUser);
+            if (isSuccessfully)
+            {
+                endUserMenu = true;
+            }  
         }
         if (UserMenuCommand == "L")
         {
