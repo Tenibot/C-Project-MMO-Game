@@ -8,6 +8,7 @@
 #include <functional>
 
 #define ErrorNumber -1
+#define FileDataChar ':'
 
 struct User
 {
@@ -45,60 +46,6 @@ T ConvertTo(std::string &text)
         result += text[i] - '0';
     }
     return result;
-}
-
-void LoadProfiles()
-{
-    std::fstream usersFile;
-    usersFile.open("users.txt", std::fstream::in);
-
-    std::string userLine;
-
-    std::string username;
-    std::string password;
-    std::string level;
-
-    if (usersFile.is_open() == false)
-    {
-        std::cerr << "Failed to open file.";
-    }
-    else
-    {
-        while (std::getline(usersFile, userLine))
-        {
-            int i = 0;
-            while (i < userLine.size() && userLine[i] != ':')
-            {
-                username += userLine[i++];
-            }
-            i++;
-            while (i < userLine.size() && userLine[i] != ':')
-            {
-                password += userLine[i++];
-            }
-            i++;
-            while (i < userLine.size())
-            {
-                level += userLine[i++];
-            }
-            i++;
-
-            int n_level;
-            n_level = ConvertTo<int>(level);
-
-            std::pair<int, int> range = DetermineRange(n_level);
-
-            std::size_t n_password = ConvertTo<size_t>(password);
-
-            User aUser = {username, n_password, n_level, range};
-            Users.push_back(aUser);
-
-            username = "";
-            password = "";
-            level = "";
-        }
-        usersFile.close();
-    }
 }
 
 bool isLetter_UpperCase(const char letter)
@@ -225,6 +172,122 @@ bool String_Contains_Digit(std::string &str)
         }
     }
     return false;
+}
+
+bool Check_Only_Digits(std::string &str)
+{
+    for (int i = 0; i < str.size(); i++)
+    {
+        if (!isLetter_Digit(str[i]))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool Check_OnlyTwo_Colons(std::string &str)
+{
+    int count_colons = 0;
+    for (int i = 0; i < str.size(); i++)
+    {
+        if (str[i] == FileDataChar)
+        {
+            count_colons++;
+        }
+    }
+
+    if (count_colons == 2)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool checkFile(std::string &userLine)
+{
+    if (Check_OnlyTwo_Colons(userLine))
+    {
+        return true;
+    }
+    return false;
+}
+
+void LoadProfiles()
+{
+    std::fstream usersFile;
+    usersFile.open("users1.txt", std::fstream::in);
+
+    std::string userLine;
+
+    std::string username;
+    std::string password;
+    std::string level;
+
+    if (usersFile.is_open() == false)
+    {
+        usersFile.open("users1.txt", std::fstream::out);
+    }
+    else
+    {
+        while (std::getline(usersFile, userLine))
+        {
+            int i = 0;
+            while (i < userLine.size() && userLine[i] != FileDataChar)
+            {
+                username += userLine[i++];
+            }
+            i++;
+            while (i < userLine.size() && userLine[i] != FileDataChar)
+            {
+                password += userLine[i++];
+            }
+            i++;
+            while (i < userLine.size())
+            {
+                level += userLine[i++];
+            }
+            i++;
+
+            int n_level;
+            n_level = ConvertTo<int>(level);
+
+            std::pair<int, int> range = DetermineRange(n_level);
+
+            std::size_t n_password = ConvertTo<size_t>(password);
+
+            User aUser = {username, n_password, n_level, range};
+            Users.push_back(aUser);
+
+            username = "";
+            password = "";
+            level = "";
+        }
+    }
+    usersFile.close();
+}
+
+void SaveFile()
+{
+    std::fstream usersFile;
+    usersFile.open("users1.txt", std::fstream::out);
+
+    std::string userLine;
+
+    if (usersFile.is_open() == false)
+    {
+        std::cerr << "Failed to open file.\n";
+    }
+    else
+    {
+        for (int i = 0; i < Users.size(); i++)
+        {
+            usersFile << Users[i].username << FileDataChar;
+            usersFile << Users[i].password << FileDataChar;
+            usersFile << Users[i].level << "\n";
+        }
+        usersFile.close();
+    }
 }
 
 bool Password_Check(std::string &password)
@@ -657,6 +720,7 @@ bool MainMenuLogic(User &aUser)
         if (HomeMenuCommand == "Q")
         {
             endProgram = true;
+            SaveFile();
         }
     } while (!endProgram);
     return endProgram;
@@ -667,7 +731,6 @@ int main()
     LoadProfiles();
     User aUser;
     MainMenuLogic(aUser);
-
 
     return 0;
 }
