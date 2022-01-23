@@ -1,48 +1,19 @@
-#include <iostream>
-#include <vector>
-#include <string>
+/**
+*  
+* Solution to course project # 2
+* Introduction to programming course
+* Faculty of Mathematics and Informatics of Sofia University
+* Winter semester 2021/2022
+*
+* @author Teodor Kostadinov
+* @idnumber 4MI0600097
+* @compiler GCC
+*
+* <cpp file with helper functions implementations>
+*
+*/
 
-#include <fstream>
-
-#include <utility>
-#include <functional>
-
-#define ErrorNumber -1
-#define FileDataChar ':'
-
-#define Main_Command_Quit "Q"
-#define Main_Command_Login "L"
-#define Main_Command_Register "R"
-
-#define User_Command_Close "C"
-#define User_Command_Duel "D"
-#define User_Command_Find "F"
-#define User_Command_Logout "L"
-#define User_Command_Suggest "S"
-#define User_Command_Help "H"
-
-struct User
-{
-    std::string username;
-    std::size_t password;
-    int level = 1;
-    std::pair<int, int> range;
-};
-
-std::pair<int, int> DetermineRange(const int level)
-{
-    std::pair<int, int> range;
-    const int step = 5;
-    int level_Copy = level;
-
-    while (level_Copy % step != 0)
-    {
-        level_Copy--;
-    }
-    range.first = level_Copy;
-    range.second = level_Copy + step;
-    return range;
-}
+#include "functions.h"
 
 template <typename T>
 
@@ -86,7 +57,7 @@ bool isLetter_Digit(const char letter)
 
 bool isLetter_Symbol(const char letter)
 {
-    const std::vector<char> GivenSymbols = {'!', '@', '#', '$', '%', '^', '&', '*'};
+    std::vector<char> GivenSymbols = {'!', '@', '#', '$', '%', '^', '&', '*'};
     for (int l = 0; l < GivenSymbols.size(); l++)
     {
         if (letter == GivenSymbols[l])
@@ -95,44 +66,6 @@ bool isLetter_Symbol(const char letter)
         }
     }
     return false;
-}
-
-bool is_Input_size_OK(const std::string &input)
-{
-    const int min_input_size = 5;
-    if (input.size() < min_input_size)
-    {
-        return false;
-    }
-    return true;
-}
-
-bool is_Username_OK(const std::string &username)
-{
-    if (!is_Input_size_OK(username))
-    {
-        return false;
-    }
-    for (int i = 0; i < username.size(); i++)
-    {
-        if (!(isLetter_UpperCase(username[i]) || isLetter_LowerCase(username[i]) || isLetter_Digit(username[i])))
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool are_Password_Characters_OK(const std::string &password)
-{
-    for (int i = 0; i < password.size(); i++)
-    {
-        if (!(isLetter_UpperCase(password[i]) || isLetter_LowerCase(password[i]) || isLetter_Digit(password[i]) || isLetter_Symbol(password[i])))
-        {
-            return false;
-        }
-    }
-    return true;
 }
 
 bool String_Contains_UpperCase(const std::string &str)
@@ -211,6 +144,65 @@ bool Check_OnlyTwo_Colons(const std::string &str)
         return true;
     }
     return false;
+}
+
+std::size_t ReturnHash(const std::string &password)
+{
+    std::hash<std::string> str_hash;
+    std::size_t h_password = str_hash(password);
+    return h_password;
+}
+
+bool is_Input_size_OK(const std::string &input)
+{
+    if (input.size() < min_input_size)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool is_Username_OK(const std::string &username)
+{
+    if (!is_Input_size_OK(username))
+    {
+        return false;
+    }
+    for (int i = 0; i < username.size(); i++)
+    {
+        if (!(isLetter_UpperCase(username[i]) || isLetter_LowerCase(username[i]) || isLetter_Digit(username[i])))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool are_Password_Characters_OK(const std::string &password)
+{
+    for (int i = 0; i < password.size(); i++)
+    {
+        if (!(isLetter_UpperCase(password[i]) || isLetter_LowerCase(password[i]) || isLetter_Digit(password[i]) || isLetter_Symbol(password[i])))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+std::pair<int, int> DetermineRange(const int level)
+{
+    std::pair<int, int> range;
+    const int step = 5;
+    int level_Copy = level;
+
+    while (level_Copy % step != 0)
+    {
+        level_Copy--;
+    }
+    range.first = level_Copy;
+    range.second = level_Copy + step;
+    return range;
 }
 
 bool CheckDublicateProfile(const std::string username, const std::vector<User> &Users)
@@ -389,13 +381,6 @@ bool LoginUsername(int &userNumber, const std::vector<User> &Users)
         return false;
     }
     return true;
-}
-
-std::size_t ReturnHash(const std::string &password)
-{
-    std::hash<std::string> str_hash;
-    std::size_t h_password = str_hash(password);
-    return h_password;
 }
 
 bool LoginPassword(const int userNumber, const std::vector<User> &Users)
@@ -794,14 +779,4 @@ void MainMenuLogic(std::vector<User> Users, User &aUser)
         }
     } while (!endProgram);
     return;
-}
-
-int main()
-{
-    std::vector<User> Users = LoadProfiles();
-    User aUser;
-
-    MainMenuLogic(Users, aUser);
-
-    return 0;
 }
