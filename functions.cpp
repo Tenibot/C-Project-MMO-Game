@@ -193,15 +193,14 @@ bool are_Password_Characters_OK(const std::string &password)
 std::pair<int, int> DetermineRange(const int level)
 {
     std::pair<int, int> range;
-    const int step = 5;
     int level_Copy = level;
 
-    while (level_Copy % step != 0)
+    while (level_Copy % Range_step != 0)
     {
         level_Copy--;
     }
     range.first = level_Copy;
-    range.second = level_Copy + step;
+    range.second = level_Copy + Range_step;
     return range;
 }
 
@@ -626,7 +625,7 @@ void UpdatePlayerInfo(const User &aUser, std::vector<User> &Users)
 
 void DuelWin(User &Winner, User &Loser, std::vector<User> &Users)
 {
-    if (Winner.level - Loser.level < 5)
+    if (Winner.level - Loser.level < Range_step)
     {
         Winner.level++;
         Winner.range = DetermineRange(Winner.level);

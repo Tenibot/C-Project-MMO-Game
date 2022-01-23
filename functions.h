@@ -62,6 +62,7 @@ bool is_Username_OK(const std::string &username);
 bool are_Password_Characters_OK(const std::string &password);
 
 #define ErrorNumber -1
+#define Range_step 5
 
 #define Main_Command_Quit "Q"
 #define Main_Command_Login "L"
