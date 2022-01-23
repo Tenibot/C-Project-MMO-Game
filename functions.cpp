@@ -387,7 +387,10 @@ User Register()
     while (Loop_Username)
     {
         Loop_Username = !RegisterUsername(username);
-        username = "";
+        if (Loop_Username)
+        {
+            username = "";
+        }
     }
 
     bool Loop_Password = true;
@@ -399,7 +402,11 @@ User Register()
             Loop_Password = !RegisterPassword_Repeat(password);
         }
     }
+    
     User user = {username, password};
+    user.range = DetermineRange(user.level);
+    Users.push_back(user);
+
     return user;
 }
 
